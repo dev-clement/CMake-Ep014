@@ -1,0 +1,116 @@
+# CMake using loops
+Using CMake, if you want to do things on repititive way, you could be able to use loops.
+:toc:
+:sectnums:
+
+== Introduction
+Using loops in CMake, you will be able to create some foreach loop as well as while loops.
+
+== Using foreach
+The `foreach` loop evaluate a group of commands for each value in a list, like so:
+```cmake
+foreach(<loop_var> <items>)
+    <command>
+endforeach()
+```
+In the example above, `<item>` is a list of items that are separated by a semicolon or whitespace. All commands between `foreach` and the matching `endforeach` are recorded without being invoked.
+
+Once the `endforeach` is evaluated, the recorded list of commands is invoked once for each item in `<items>`.
+
+At the beggining of each iteration the variable `<loop_var>` will be set to the value of the current item.
+
+The scope of `<loop_var>` is restricted to the loop scope.
+
+Per legacy, the `endforeach()` command admits an optional `<loop_var>` argument. IF used, it must be a verbatom repeat of the argument of the opening `foreach` command.
+
+=== Get out of the loop
+The commands `break()` and `continue()` provide means to escape from the normal control flow.
+
+=== Example
+```cmake
+foreach(<loop_var> RANGE <stop>)
+```
+In this variant, `foreach` iterates over the numbers 0,1, ... up to (and including) the nonegative integer `<stop>`
+
+```cmake
+foreach(<loop_var> RANGE <start> <stop> [<step>])
+```
+In this variant, `foreach` iterates over the numbers from `<start>` up to at most `<stop>` in steps of `<step>`. If `<step>` is not specified then the step size is 1. The three arguments `<start>`,  `<stop>` and `<step>` must all be nonnegative integers, and `<stop>` must not be smaller than `<start>`, otherwise you enter the danger zone of undocumented behavior.
+
+```cmake
+foreach(<loop_var> IN [LISTS [<lists>]] [ITEMS [<items>]])
+```
+In thie variant, `<lists>` is a whitespace orr a semicolon separated list of list-values variables. The `foreach` command iterates over each item in each given list. The `<items>` following the `ITEMS` keyword are processed as in the first variant of the `foreach` command. Ths forms `LIST A` and `ITEMS ${A}` are equivalent.
+
+The following example shows how the `LIST` option is processed
+
+```cmake
+set(A 0;1)
+set(B 2 3)
+set(C "4 5")
+set(D 6;7 8)
+set(E "")
+foreach(X IN LISTS A B C D E)
+    message(STATUS "X=${X}")
+endforeach()
+```
+
+The example above will yields:
+```bash
+-- X=0
+-- X=1
+-- X=2
+-- X=3
+-- X=4 5
+-- X=6
+-- X=7
+-- X=8
+```
+
+=== Another example
+Foreach oop that defines a list of names
+```cmake
+set(names "Alice" "Bob" "Charlie" "David" "Eve")
+```
+Iterate through the above list of names using a foreach loop:
+```cmake
+foreach(name ${names})
+    message("Names: ${name}")
+endforeach()
+```
+== Using while loop
+A cmake while loop evaluate a group of commands xhile a condition is set to true
+```cmake
+while(<condition>)
+    <commands>
+endwhile()
+```
+All commands between the while and the matching `endwhile` are recorded without being invoked. Once the `endwhile()` is evaluated, the recorded list of commands is invoked as long as the `<condition>` is true.
+
+The `<condition>` has the same syntax and is evaluated using the same logic as described at length for the `if()` command.
+
+The command `break()` and `continue()` provide means to escape from the normal control flow.
+
+Per legacy, the `endwhile()` command admits an optional `<condition>` argument. If used, it must be a verbatim re-peat of the argument of the opening `ẁhile` command.
+
+=== Example of while loop
+While loop defined below with a list of names:
+```cmake
+set(names "Alice" "Bob" "Charlie" "David" "Eve")
+```
+Get the number of names in the list
+```cmake
+list(LENGTH names num_names)
+```
+Initialize a counter variables
+```cmake
+set(counter 0)
+```
+Create the while loop to iterate through the list of names:
+```cmake
+while (counter LESS num_names)
+    list(GET names ${counter} name) # Fetch the name at ${counter} of the while loop
+    message("Name: ${name}") # Print the name
+    math(EXPR counter "${counter} + 1") # Increment the counter
+endwhile()
+```
